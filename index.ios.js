@@ -18,14 +18,20 @@ import {
     Animations,
     Schema
 } from "react-native-redux-router";
+//import { createStore, combineReducers } from 'redux';
+//import { Provider } from 'react-redux';
+//let store = createStore(combineReducers({routerReducer}));
 
-import {Login} from "./components/ios";
+import {
+    Login,
+    Play
+} from "./components/ios";
 
 class music extends Component {
   render() {
     return (
       <View style={styles.container}>
-          <Login />
+          <Play />
       </View>
     );
   }

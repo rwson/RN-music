@@ -8,7 +8,9 @@
 "use strict";
 
 import Login from "./Login";
+import Play from "./Play";
 
 export {
-    Login
+    Login,
+    Play
 };

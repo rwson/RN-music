@@ -35,13 +35,24 @@ export default class Login extends Component {
         super(props);
     }
 
+    blurKeyBoard() {
+        this.refs.email.blur();
+        this.refs.password.blur();
+    }
+
     onLogin() {
+        this.blurKeyBoard();
         alert("正在开发中...");
+    }
+
+    containerTouched() {
+        this.blurKeyBoard();
+        return false;
     }
 
     render() {
         return (
-            <View style={styles.container}>
+            <View style={styles.container} onStartShouldSetResponder={this.containerTouched.bind(this)}>
                 <View style={[styles.container,styles.fullScreen]}>
                     <Image source={background} style={[styles.bjImage,styles.fullScreen]}>
                         <View style={styles.loginFields}>
@@ -51,13 +62,21 @@ export default class Login extends Component {
                             <View style={styles.loginForm}>
                                 <View style={[styles.fileds,styles.email]}>
                                     <Image source={mailIcon} style={[styles.filedIcon,styles.mailIcon]}/>
-                                    <TextInput style={styles.input} placeholder="email" keyboardType="email-address"
-                                               autoCorrect={false} clearButtonMode="while-editing"/>
+                                    <TextInput style={styles.input}
+                                               ref="email"
+                                               placeholder="email"
+                                               keyboardType="email-address"
+                                               autoCorrect={false}
+                                               clearButtonMode="while-editing" />
                                 </View>
                                 <View style={[styles.fileds,styles.password]}>
                                     <Image source={lockIcon} style={[styles.filedIcon,styles.lockIcon]}/>
-                                    <TextInput style={styles.input} placeholder=" password" secureTextEntry={true}
-                                               autoCorrect={false} clearButtonMode="while-editing"/>
+                                    <TextInput style={styles.input}
+                                               ref="password"
+                                               placeholder=" password"
+                                               secureTextEntry={true}
+                                               autoCorrect={false}
+                                               clearButtonMode="while-editing" />
                                 </View>
                                 <View style={styles.fileds}>
                                     <TouchableHighlight underlayColor="transparent" activeOpacity={0.8}
