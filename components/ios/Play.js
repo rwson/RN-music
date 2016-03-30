@@ -17,8 +17,14 @@ import React, {
     ScrollView,
     ProgressViewIOS,
     ListView,
-    StyleSheet
+    StyleSheet,
+    NativeAppEventEmitter,
+    NativeModules
 } from "react-native";
+
+let playInterval = null;
+
+const audio = NativeModules.RNAudioPlayerURL;
 
 import * as Util from "../../Util";
 
@@ -30,6 +36,8 @@ const commonBackground = Util.commonBackground;
 const playControllerBackground = Util.playControllerBackground;
 const defaultAlbum = Util.defaultAlbum;
 
+const startIcon = Util.startIcon;
+const playIng = Util.playIng;
 const backBtn = Util.backBtn;
 const playBtn = Util.playBtn;
 const pauseBtn = Util.pauseBtn;
@@ -49,20 +57,56 @@ export default class Play extends Component {
             curMode: "repeat-list",
             curSong: {},
             progress: 0,
-            songsList: new ListView.DataSource({
-                rowHasChanged: (r1, r2) => r1 !== r2
+            songList: new ListView.DataSource({
+                rowHasChanged: (r1, r2) => {
+                    return r1.status && r2.status;
+                }
             })
         };
+        this.renderSongItem = this.renderSongItem.bind(this);
     }
 
     componentWillMount() {
-        fetch("http://music.qq.com/musicbox/shop/v3/data/hit/hit_all.js",{
-            "method": "GET"
-        }).then((res) => {
-            console.log(res);
-            return res.json();
-        }).then((res) => {
-            //console.log(res);
+        const {songList} = this.state;
+        let songs = Util.songList;
+        songs.forEach((song, index) => {
+            let temp = song;
+            temp.status = "pausing";
+            song[index] = temp;
+        });
+        this.setState({
+            songList: songList.cloneWithRows(songs)
+        });
+    }
+
+    handlePress(id) {
+        let temp;
+        let songs = Util.songList;
+        const {songList} = this.state;
+        songs.map((song) => {
+            temp = song;
+            temp.status = "pausing";
+            if (temp.id == id) {
+                this.setState({
+                    curSong: temp
+                });
+                temp.status = "playing";
+            }
+            return temp;
+        });
+        audio.initWithURL(this.state.curSong.src);
+        audio.play();
+
+        audio.getDuration((duration) => {
+            let now = 0;
+            clearInterval(playInterval);
+            playInterval = setInterval(()=> {
+                now += 1;
+                console.log(now / duration);
+            },1000);
+        });
+        this.setState({
+            songList: songList.cloneWithRows(songs)
         });
     }
 
@@ -76,6 +120,15 @@ export default class Play extends Component {
         let lastBtn;
         let playPause;
         let nextBtn;
+
+        controllerBackground = playControllerBackground;
+        curAlbum = defaultAlbum;
+        songName = "no song is playing";
+        songAuthor = "no song is playing";
+        lastBtn = lastDisable;
+        playPause = playBtn;
+        nextBtn = nextDisable;
+
         if (isEmpty) {
             controllerBackground = playControllerBackground;
             curAlbum = defaultAlbum;
@@ -85,13 +138,13 @@ export default class Play extends Component {
             playPause = playBtn;
             nextBtn = nextDisable;
         } else {
-            controllerBackground = require(curSong.thumbImage);
-            curAlbum = require(curSong.album);
-            songName = curSong.soneName;
-            songAuthor = curSong.songAuthor;
-            lastBtn = last;
-            playPause = pauseBtn;
-            nextBtn = next;
+            //controllerBackground = require(curSong.thumbImage);
+            //curAlbum = require(curSong.album);
+            //songName = curSong.soneName;
+            //songAuthor = curSong.songAuthor;
+            //lastBtn = last;
+            //playPause = pauseBtn;
+            //nextBtn = next;
         }
         return (
             <View style={styles.playController}>
@@ -127,28 +180,50 @@ export default class Play extends Component {
         );
     }
 
-    renderSongs() {
+    renderSongItem(music:Object) {
+        let rightBtn = startIcon;
+        if (music.status == "playing") {
+            rightBtn = playIng;
+        }
         return (
-            <View></View>
+            <View key={music.id} style={styles.musicItem}>
+                <Image source={{uri:music.cover}}
+                       style={styles.musicCover}/>
+                <View style={styles.musicInfo}>
+                    <View style={styles.musicInfoInner}>
+                        <Text style={styles.title}>{music.title}</Text>
+                        <Text style={styles.author}>{music.author}</Text>
+                    </View>
+                    <TouchableHighlight onPress={this.handlePress.bind(this,music.id)}
+                                        underlayColor="transparent"
+                                        activeOpacity={0.8}>
+                        <Image source={rightBtn}
+                               style={styles.rightBtn}/>
+                    </TouchableHighlight>
+                </View>
+            </View>
         );
     }
 
     renderPlayerList() {
-        const {songsList} = this.state;
-        return (
-            <View style={[styles.container,styles.playList]}>
-                <ScrollView>
-                    <ListView
-                        ref="listview"
-                        dataSource={songsList}
-                        renderRow={this.renderSongs}
-                        automaticallyAdjustContentInsets={false}
-                        keyboardDismissMode="on-drag"
-                        keyboardShouldPersisiTaps={true}
-                        showVerticalIndicatpr={false}/>
-                </ScrollView>
-            </View>
-        );
+        const {songList} = this.state;
+        if (songList.getRowCount() > 0) {
+            return (
+                <View style={[styles.container,styles.playList]}>
+                    <ScrollView>
+                        <ListView
+                            ref="listview"
+                            dataSource={songList}
+                            renderRow={this.renderSongItem}
+                            automaticallyAdjustContentInsets={false}
+                            keyboardDismissMode="on-drag"
+                            keyboardShouldPersisiTaps={true}
+                            showVerticalIndicatpr={false}/>
+                    </ScrollView>
+                </View>
+            );
+        }
+        return null;
     }
 
     render() {
@@ -206,14 +281,15 @@ const styles = StyleSheet.create({
     songName: {
         flex: 1,
         backgroundColor: "transparent",
-        fontSize: 8 / scale,
+        fontSize: 10 / scale,
+        fontWeight: "bold",
         color: "#fff",
         textAlign: "center"
     },
     songAuthor: {
         flex: 1,
         backgroundColor: "transparent",
-        fontSize: 7 / scale,
+        fontSize: 8 / scale,
         color: "#fff",
         textAlign: "center"
     },
@@ -244,7 +320,51 @@ const styles = StyleSheet.create({
         height: 33 * scale
     },
     playList: {
-        marginTop: 420 * scale
+        flex: 1,
+        flexDirection: "row"
+    },
+    musicItem: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        height: 160 * scale,
+        backgroundColor: "transparent",
+        borderTopColor: "rgba(255,255,255,0.4)",
+        borderTopWidth: 1 / screenScale,
+        borderBottomColor: "#156a96",
+        borderBottomWidth: 1 / screenScale
+    },
+    musicCover: {
+        width: 100 * scale,
+        height: 100 * scale,
+        marginLeft: 30 * scale,
+        marginRight: 30 * scale
+    },
+    musicInfo: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    musicInfoInner: {
+        width: 495 * scale
+    },
+    title: {
+        fontSize: 30 * scale,
+        color: "#fff",
+        fontWeight: "bold"
+    },
+    author: {
+        fontSize: 25 * scale,
+        color: "#fff"
+    },
+    rightCtrl: {
+        width: 30 * scale,
+        height: 30 * scale
+    },
+    rightBtn: {
+        width: 40 * scale,
+        height: 40 * scale
     }
 });
 
