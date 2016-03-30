@@ -18,10 +18,11 @@ import React, {
     ProgressViewIOS,
     ListView,
     StyleSheet,
-    NativeAppEventEmitter,
     NativeModules
 } from "react-native";
 
+let temp;
+let now = 0;
 let playInterval = null;
 
 const audio = NativeModules.RNAudioPlayerURL;
@@ -79,8 +80,7 @@ export default class Play extends Component {
         });
     }
 
-    handlePress(id) {
-        let temp;
+    handlePress(id, pause) {
         let songs = Util.songList;
         const {songList} = this.state;
         songs.map((song) => {
@@ -98,20 +98,61 @@ export default class Play extends Component {
         audio.play();
 
         audio.getDuration((duration) => {
-            let now = 0;
+            if (!pause) {
+                now = 0;
+            }
             clearInterval(playInterval);
             playInterval = setInterval(()=> {
                 now += 1;
-                console.log(now / duration);
-            },1000);
+                this.setState({
+                    progress: now / duration
+                });
+            }, 1000);
         });
         this.setState({
             songList: songList.cloneWithRows(songs)
         });
     }
 
+    lastSong() {
+        let id = temp.id;
+        if (!id) {
+            return;
+        }
+        let lastIndex = -1;
+        let songs = Util.songList;
+        songs.forEach((song, index) => {
+            if (song.id == id) {
+                lastIndex = (index == 0 ? songs.length - 1 : index - 1);
+            }
+        });
+        this.handlePress(songs[lastIndex]["id"]);
+    }
+
+    play(pause) {
+        const songs = Util.songList;
+        this.handlePress(songs[0]["id"], now > 0);
+    }
+
+    nextSong() {
+        let id = temp.id;
+        if (!id) {
+            return;
+        }
+        let nextIndex = -1;
+        let songs = Util.songList;
+        songs.forEach((song, index) => {
+            if (song.id == id) {
+                console.log(index);
+                nextIndex = (index == songs.length - 1 ? 0 : index + 1);
+            }
+        });
+        console.log(nextIndex);
+        this.handlePress(songs[nextIndex]["id"]);
+    }
+
     renderPlayerHeader() {
-        const {curSong} = this.state;
+        const {curSong,progress} = this.state;
         const isEmpty = Util.isEmpty(curSong);
         let controllerBackground;
         let curAlbum;
@@ -138,39 +179,47 @@ export default class Play extends Component {
             playPause = playBtn;
             nextBtn = nextDisable;
         } else {
-            //controllerBackground = require(curSong.thumbImage);
-            //curAlbum = require(curSong.album);
-            //songName = curSong.soneName;
-            //songAuthor = curSong.songAuthor;
-            //lastBtn = last;
-            //playPause = pauseBtn;
-            //nextBtn = next;
+            controllerBackground = {uri: curSong.cover};
+            curAlbum = {uri: curSong.cover};
+            songName = curSong.title;
+            songAuthor = curSong.author;
+            lastBtn = last;
+            playPause = pauseBtn;
+            nextBtn = next;
         }
+
         return (
             <View style={styles.playController}>
                 <Image source={controllerBackground} style={styles.controllerBj}>
-                    <View style={styles.playIng}>
-                        <Image souce={curAlbum} style={styles.songAlbum}/>
-                        <View style={styles.songInfo}>
-                            <View style={styles.name}>
-                                <Text style={styles.songName}>{songName}</Text>
-                                <Text style={styles.songAuthor}>{songAuthor}</Text>
-                            </View>
-                            <View style={styles.progress}>
-                                <ProgressViewIOS progress={0.6}
-                                                 trackTintColor="#fff"
-                                                 progressTintColor="#00aeff"
-                                                 style={styles.progressBar}/>
-                                <View style={styles.ctrlBtns}>
-                                    <TouchableHighlight style={[styles.btnItem]}>
-                                        <Image source={lastBtn} style={styles.lastNext}/>
-                                    </TouchableHighlight>
-                                    <TouchableHighlight style={[styles.btnItem,styles.btnPause]}>
-                                        <Image source={playPause} style={styles.playPause}/>
-                                    </TouchableHighlight>
-                                    <TouchableHighlight style={[styles.btnItem]}>
-                                        <Image source={nextBtn} style={styles.lastNext}/>
-                                    </TouchableHighlight>
+                    <View style={styles.playerUnder}>
+                        <View style={styles.playIng}>
+                            <View style={styles.songInfo}>
+                                <View style={styles.name}>
+                                    <Text style={styles.songName}>{songName}</Text>
+                                    <Text style={styles.songAuthor}>{songAuthor}</Text>
+                                </View>
+                                <View style={styles.progress}>
+                                    <ProgressViewIOS progress={progress}
+                                                     trackTintColor="#fff"
+                                                     progressTintColor="#00aeff"
+                                                     style={styles.progressBar}/>
+                                    <View style={styles.ctrlBtns}>
+                                        <TouchableHighlight style={[styles.btnItem]}
+                                                            underlayColor="transparent"
+                                                            onPress={this.lastSong.bind(this)}>
+                                            <Image source={lastBtn} style={styles.lastNext} />
+                                        </TouchableHighlight>
+                                        <TouchableHighlight style={[styles.btnItem,styles.btnPause]}
+                                                            underlayColor="transparent"
+                                                            onPress={this.play.bind(this)}>
+                                            <Image source={playPause} style={styles.playPause} />
+                                        </TouchableHighlight>
+                                        <TouchableHighlight style={[styles.btnItem]}
+                                                            underlayColor="transparent"
+                                                            onPress={this.nextSong.bind(this)}>
+                                            <Image source={nextBtn} style={styles.lastNext} />
+                                        </TouchableHighlight>
+                                    </View>
                                 </View>
                             </View>
                         </View>
@@ -251,8 +300,15 @@ const styles = StyleSheet.create({
         width: 750 * scale,
         height: 420 * scale
     },
+    playerUnder: {
+        width: 750 * scale,
+        height: 420 * scale,
+        backgroundColor: "rgba(0,0,0,0.8)"
+    },
     playIng: {
         flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
         width: 690 * scale,
         height: 160 * scale,
         marginLeft: 30 * scale,
@@ -281,7 +337,7 @@ const styles = StyleSheet.create({
     songName: {
         flex: 1,
         backgroundColor: "transparent",
-        fontSize: 10 / scale,
+        fontSize: 8 / scale,
         fontWeight: "bold",
         color: "#fff",
         textAlign: "center"
@@ -289,13 +345,13 @@ const styles = StyleSheet.create({
     songAuthor: {
         flex: 1,
         backgroundColor: "transparent",
-        fontSize: 8 / scale,
+        fontSize: 7 / scale,
         color: "#fff",
         textAlign: "center"
     },
     progressBar: {
         width: 485 * scale,
-        height: 6 / screenScale,
+        height: 10 / screenScale,
         marginTop: 10 * scale,
         marginBottom: 20 * scale
     },
