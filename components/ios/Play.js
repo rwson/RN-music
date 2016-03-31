@@ -81,19 +81,19 @@ export default class Play extends Component {
         });
     }
 
-    handlePress(id, pause) {
+    handlePress(id) {
         let songs = Util.songList;
         const {songList} = this.state;
-        if (!pause) {
-            now = 0;
-        } else {
-            audio.pause();
-            clearInterval(playInterval);
-            this.setState({
-                playing: false
-            });
-            return;
-        }
+        //if (!pause) {
+        //    now = 0;
+        //} else {
+        //    audio.pause();
+        //    clearInterval(playInterval);
+        //    this.setState({
+        //        playing: false
+        //    });
+        //    return;
+        //}
         songs.map((song) => {
             temp = song;
             temp.status = "pausing";
@@ -281,7 +281,7 @@ export default class Play extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Image source={commonBackground} style={[styles.container,styles.fullScreen]}>
+                <Image source={commonBackground} style={[styles.container,styles.fullScreen,styles.bjImage]}>
                     {this.renderPlayerHeader()}
                     {this.renderPlayerList()}
                 </Image>
@@ -293,6 +293,10 @@ export default class Play extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1
+    },
+    bjImage: {
+        width: screenWidth,
+        height: screenHeight
     },
     playController: {
         height: 420 * scale,

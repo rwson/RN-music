@@ -9,8 +9,12 @@
 
 import Login from "./Login";
 import Play from "./Play";
+import Profile from "./Profile";
+import NearBy from "./NearBy";
 
 export {
     Login,
-    Play
+    Play,
+    Profile,
+    NearBy
 };
