@@ -22,6 +22,7 @@ import React, {
 } from "react-native";
 
 let temp;
+let currentId;
 let now = 0;
 let playInterval = null;
 
@@ -83,12 +84,24 @@ export default class Play extends Component {
     handlePress(id, pause) {
         let songs = Util.songList;
         const {songList} = this.state;
+        if (!pause) {
+            now = 0;
+        } else {
+            audio.pause();
+            clearInterval(playInterval);
+            this.setState({
+                playing: false
+            });
+            return;
+        }
         songs.map((song) => {
             temp = song;
             temp.status = "pausing";
             if (temp.id == id) {
+                currentId = id;
                 this.setState({
-                    curSong: temp
+                    curSong: temp,
+                    playing: true
                 });
                 temp.status = "playing";
             }
@@ -98,9 +111,6 @@ export default class Play extends Component {
         audio.play();
 
         audio.getDuration((duration) => {
-            if (!pause) {
-                now = 0;
-            }
             clearInterval(playInterval);
             playInterval = setInterval(()=> {
                 now += 1;
@@ -115,44 +125,41 @@ export default class Play extends Component {
     }
 
     lastSong() {
-        let id = temp.id;
-        if (!id) {
+        if (!currentId) {
             return;
         }
         let lastIndex = -1;
         let songs = Util.songList;
         songs.forEach((song, index) => {
-            if (song.id == id) {
+            if (song.id == currentId) {
                 lastIndex = (index == 0 ? songs.length - 1 : index - 1);
             }
         });
         this.handlePress(songs[lastIndex]["id"]);
     }
 
-    play(pause) {
+    play() {
         const songs = Util.songList;
-        this.handlePress(songs[0]["id"], now > 0);
+        const {playing} = this.state;
+        this.handlePress(songs[0]["id"],playing);
     }
 
     nextSong() {
-        let id = temp.id;
-        if (!id) {
+        if (!currentId) {
             return;
         }
         let nextIndex = -1;
         let songs = Util.songList;
         songs.forEach((song, index) => {
-            if (song.id == id) {
-                console.log(index);
+            if (song.id == currentId) {
                 nextIndex = (index == songs.length - 1 ? 0 : index + 1);
             }
         });
-        console.log(nextIndex);
         this.handlePress(songs[nextIndex]["id"]);
     }
 
     renderPlayerHeader() {
-        const {curSong,progress} = this.state;
+        const {curSong,progress,playing} = this.state;
         const isEmpty = Util.isEmpty(curSong);
         let controllerBackground;
         let curAlbum;
@@ -161,14 +168,6 @@ export default class Play extends Component {
         let lastBtn;
         let playPause;
         let nextBtn;
-
-        controllerBackground = playControllerBackground;
-        curAlbum = defaultAlbum;
-        songName = "no song is playing";
-        songAuthor = "no song is playing";
-        lastBtn = lastDisable;
-        playPause = playBtn;
-        nextBtn = nextDisable;
 
         if (isEmpty) {
             controllerBackground = playControllerBackground;
@@ -186,6 +185,10 @@ export default class Play extends Component {
             lastBtn = last;
             playPause = pauseBtn;
             nextBtn = next;
+        }
+
+        if(!playing){
+            playPause = playBtn;
         }
 
         return (
