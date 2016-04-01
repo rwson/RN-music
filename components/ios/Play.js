@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         width: 485 * scale,
-        height: 10 / screenScale,
+        height: 150 / screenScale,
         marginTop: 10 * scale,
         marginBottom: 20 * scale
     },

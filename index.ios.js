@@ -4,11 +4,12 @@
  */
 
 import React, {
-  AppRegistry,
-  Component,
-  StyleSheet,
-  Text,
-  View
+    AppRegistry,
+    Component,
+    StyleSheet,
+    Text,
+    View,
+    StatusBar
 } from "react-native";
 
 import {
@@ -31,19 +32,22 @@ import {
 } from "./components/ios";
 
 class music extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-          <Play />
-      </View>
-    );
-  }
+    render() {
+        return (
+            <View style={styles.container}>
+                <StatusBar
+                    backgroundColor="blue"
+                    barStyle="light-content" />
+                <NearBy />
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  }
+    container: {
+        flex: 1
+    }
 });
 
 AppRegistry.registerComponent("music", () => music);
