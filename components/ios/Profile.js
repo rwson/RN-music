@@ -18,6 +18,10 @@ import React, {
     StyleSheet
 } from "react-native";
 
+import {
+    Actions
+} from "react-native-redux-router";
+
 import ParallaxView from "react-native-parallax-view";
 
 import * as Util from "../../Util";
@@ -31,6 +35,7 @@ const commonBackground = Util.commonBackground;
 const defaultProfileCover = Util.defaultProfileCover;
 const defaultAvatar = Util.defaultAvatar;
 const locationIcon = Util.locationIcon;
+const backBtn = Util.backBtn;
 
 const userName = "小宋";
 const userLocation = "江苏 南京";
@@ -120,7 +125,14 @@ export default class Profile extends Component {
                         windowHeight={420 * scale}
                         style={styles.scrollTopArea}
                         header={(
-                                   <Image source={defaultAvatar} style={styles.avatar} />
+                                 <View>
+                                    <TouchableHighlight style={styles.backButton}
+                                                        underlayColor="transparent"
+                                                        onPress={() => Actions.NearBy()}>
+                                        <Image source={backBtn} style={styles.backBtn}/>
+                                    </TouchableHighlight>
+                                    <Image source={defaultAvatar} style={styles.avatar} />
+                                 </View>
                                )}
                         contentInset={{top: 0}}>
                         <View>
@@ -149,6 +161,14 @@ export default class Profile extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1
+    },
+    backButton: {
+        marginLeft: 30 * scale,
+        marginTop: 70 * scale
+    },
+    backBtn: {
+        width: 24 * scale,
+        height: 41 * scale
     },
     bjImage: {
         width: screenWidth,

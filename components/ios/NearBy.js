@@ -19,6 +19,10 @@ import React, {
     Menu
 } from "react-native";
 
+import {
+    Actions
+} from "react-native-redux-router";
+
 import Drawer from "react-native-drawer";
 
 import * as Util from "../../Util";
@@ -63,7 +67,11 @@ class Panel extends Component {
                                         <Text style={styles.profileText}>Profile</Text>
                                     </View>
                                     <View style={styles.userInfo}>
-                                        <Image source={defaultAvatar} style={styles.avatarPic}/>
+                                        <TouchableHighlight underlayColor="transparent"
+                                                            activeOpacity={0.8}
+                                                            onPress={() => Actions.Profile()}>
+                                            <Image source={defaultAvatar} style={styles.avatarPic}/>
+                                        </TouchableHighlight>
                                         <View style={styles.profileInfo}>
                                             <Text style={styles.userName}>{userName}</Text>
                                             <Text style={styles.userLocation}>{userLocation}</Text>
@@ -83,22 +91,35 @@ class Panel extends Component {
                             </Image>
                         </View>
                         <View style={styles.sideMenuOptions}>
-                            <View style={[styles.optionItem,styles.noBorderTop]}>
-                                <Image source={playlistIcon} style={styles.playListIcon}/>
-                                <Text style={styles.menuText}>PlayList</Text>
-                            </View>
-                            <View style={styles.optionItem}>
-                                <Image source={friendsIcon} style={styles.playListIcon}/>
-                                <Text style={styles.menuText}>Friends</Text>
-                            </View>
-                            <View style={styles.optionItem}>
-                                <Image source={messageIcon} style={styles.playListIcon}/>
-                                <Text style={styles.menuText}>Messages</Text>
-                            </View>
-                            <View style={[styles.optionItem,styles.noBorderBottom]}>
-                                <Image source={settingsIcon} style={styles.playListIcon}/>
-                                <Text style={styles.menuText}>Settings</Text>
-                            </View>
+                            <TouchableHighlight underlayColor="transparent"
+                                                activeOpacity={0.8}
+                                                onPress={() => Actions.Play()}>
+                                <View style={[styles.optionItem,styles.noBorderTop]}>
+                                    <Image source={playlistIcon} style={styles.playListIcon}/>
+                                    <Text style={styles.menuText}>PlayList</Text>
+                                </View>
+                            </TouchableHighlight>
+                            <TouchableHighlight underlayColor="transparent"
+                                                activeOpacity={0.8}>
+                                <View style={styles.optionItem}>
+                                    <Image source={friendsIcon} style={styles.playListIcon}/>
+                                    <Text style={styles.menuText}>Friends</Text>
+                                </View>
+                            </TouchableHighlight>
+                            <TouchableHighlight underlayColor="transparent"
+                                                activeOpacity={0.8}>
+                                <View style={styles.optionItem}>
+                                    <Image source={messageIcon} style={styles.playListIcon}/>
+                                    <Text style={styles.menuText}>Messages</Text>
+                                </View>
+                            </TouchableHighlight>
+                            <TouchableHighlight underlayColor="transparent"
+                                                activeOpacity={0.8}>
+                                <View style={[styles.optionItem,styles.noBorderBottom]}>
+                                    <Image source={settingsIcon} style={styles.playListIcon}/>
+                                    <Text style={styles.menuText}>Settings</Text>
+                                </View>
+                            </TouchableHighlight>
                         </View>
                     </View>
                 </Image>
@@ -156,7 +177,8 @@ export default class NearBy extends Component {
                                 </View>
                             </View>
                             <View style={styles.notifaction}>
-                                <Text style={styles.notifationText}>Nobody Found this time,would you want to research?</Text>
+                                <Text style={styles.notifationText}>Nobody Found this time,would you want to
+                                    research?</Text>
                                 <TouchableHighlight style={styles.researchIcon}
                                                     underlayColor="transparent"
                                                     onPress={this.openDrawer.bind(this)}>
@@ -375,7 +397,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 50 * scale
     },
-    notifationText:{
+    notifationText: {
         backgroundColor: "transparent"
     },
     researchIcon: {
@@ -392,5 +414,3 @@ const styles = StyleSheet.create({
         color: "#fff"
     }
 });
-
-

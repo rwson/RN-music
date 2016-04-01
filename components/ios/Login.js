@@ -17,6 +17,10 @@ import React, {
     StyleSheet
 } from "react-native";
 
+import {
+    Actions
+} from "react-native-redux-router";
+
 import * as Util from "../../Util";
 
 const screenWidth = Util.screenInfo.width;
@@ -42,7 +46,7 @@ export default class Login extends Component {
 
     onLogin() {
         this.blurKeyBoard();
-        alert("正在开发中...");
+        Actions.NearBy();
     }
 
     containerTouched() {
@@ -79,7 +83,8 @@ export default class Login extends Component {
                                                clearButtonMode="while-editing" />
                                 </View>
                                 <View style={styles.fileds}>
-                                    <TouchableHighlight underlayColor="transparent" activeOpacity={0.8}
+                                    <TouchableHighlight underlayColor="transparent"
+                                                        activeOpacity={0.8}
                                                         onPress={this.onLogin.bind(this)}>
                                         <Image source={loginBtn} style={styles.button}/>
                                     </TouchableHighlight>

@@ -21,6 +21,10 @@ import React, {
     NativeModules
 } from "react-native";
 
+import {
+    Actions
+} from "react-native-redux-router";
+
 let temp;
 let currentId;
 let now = 0;
@@ -141,7 +145,7 @@ export default class Play extends Component {
     play() {
         const songs = Util.songList;
         const {playing} = this.state;
-        this.handlePress(songs[0]["id"],playing);
+        this.handlePress(songs[0]["id"], playing);
     }
 
     nextSong() {
@@ -187,7 +191,7 @@ export default class Play extends Component {
             nextBtn = next;
         }
 
-        if(!playing){
+        if (!playing) {
             playPause = playBtn;
         }
 
@@ -195,6 +199,11 @@ export default class Play extends Component {
             <View style={styles.playController}>
                 <Image source={controllerBackground} style={styles.controllerBj}>
                     <View style={styles.playerUnder}>
+                        <TouchableHighlight style={styles.backButton}
+                                            underlayColor="transparent"
+                                            onPress={() => Actions.NearBy()}>
+                            <Image source={backBtn} style={styles.backBtn} />
+                        </TouchableHighlight>
                         <View style={styles.playIng}>
                             <View style={styles.songInfo}>
                                 <View style={styles.name}>
@@ -210,17 +219,17 @@ export default class Play extends Component {
                                         <TouchableHighlight style={[styles.btnItem]}
                                                             underlayColor="transparent"
                                                             onPress={this.lastSong.bind(this)}>
-                                            <Image source={lastBtn} style={styles.lastNext} />
+                                            <Image source={lastBtn} style={styles.lastNext}/>
                                         </TouchableHighlight>
                                         <TouchableHighlight style={[styles.btnItem,styles.btnPause]}
                                                             underlayColor="transparent"
                                                             onPress={this.play.bind(this)}>
-                                            <Image source={playPause} style={styles.playPause} />
+                                            <Image source={playPause} style={styles.playPause}/>
                                         </TouchableHighlight>
                                         <TouchableHighlight style={[styles.btnItem]}
                                                             underlayColor="transparent"
                                                             onPress={this.nextSong.bind(this)}>
-                                            <Image source={nextBtn} style={styles.lastNext} />
+                                            <Image source={nextBtn} style={styles.lastNext}/>
                                         </TouchableHighlight>
                                     </View>
                                 </View>
@@ -297,6 +306,14 @@ const styles = StyleSheet.create({
     bjImage: {
         width: screenWidth,
         height: screenHeight
+    },
+    backButton: {
+        marginLeft: 30 * scale,
+        marginTop: 70 * scale
+    },
+    backBtn: {
+        width: 24 * scale,
+        height: 41 * scale
     },
     playController: {
         height: 420 * scale,
